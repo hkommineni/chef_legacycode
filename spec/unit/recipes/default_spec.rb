@@ -16,5 +16,15 @@ describe 'redis::default' do
     it 'converges successfully' do
       expect { chef_run }.to_not raise_error
     end
+
+    it 'updates the package repository' do
+      expect(chef_run).to run_execute('apt-get update')
+    end
+    it 'installs the necessary packages'
+    it 'retreives the application from source code'
+    it 'unzips the application'
+    it 'builds and installs the application'
+    it 'installs the server'
+    it 'starts yje service'
   end
 end
