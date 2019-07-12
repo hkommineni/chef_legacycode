@@ -14,14 +14,17 @@ package "build-essential"
 
 package "tcl8.5"
 
+version_number = node['redis']['version']
+
 # download http://download.redis.io/releases/redis-2.8.9.tar.gz
-remote_file "/tmp/redis-2.8.9.tar.gz" do
-  source "http://download.redis.io/releases/redis-2.8.9.tar.gz"
-  notifies :run, "execute[tar xzf /tmp/redis-2.8.9.tar.gz]", :immediately
+remote_file "/tmp/redis-#{version_number}.tar.gz" do
+  source "http://download.redis.io/releases/redis-#{version_number}.tar.gz"
+  notifies :run, "execute[unzip_redis_archive]", :immediately
 end
 
 # unzip the archive
-execute "tar xzf /tmp/redis-2.8.9.tar.gz" do
+execute 'unzip_redis_archive' do
+  command "tar xzf /tmp/redis-#{version_number}.tar.gz"
   cwd "/tmp"
   action :nothing
   notifies :run, "execute[make && make install]", :immediately
@@ -29,14 +32,14 @@ end
 
 # Configure the application: make and make install
 execute "make && make install" do
-  cwd "/tmp/redis-2.8.9"
+  cwd "/tmp/redis-#{version_number}"
   action :nothing
   notifies :run, "execute[echo -n | ./install_server.sh]", :immediately
 end
 
 # Install the Server
 execute "echo -n | ./install_server.sh" do
-  cwd "/tmp/redis-2.8.9/utils"
+  cwd "/tmp/redis-#{version_number}/utils"
   action :nothing
 end
 
