@@ -9,7 +9,7 @@ require 'spec_helper'
 describe 'redis::default' do
   context 'When all attributes are default, on an unspecified platform' do
     let(:chef_run) do
-      runner = ChefSpec::ServerRunner.new
+      runner = ChefSpec::ServerRunner.new(step_into: ['redis'])
       runner.converge(described_recipe)
     end
 
@@ -28,6 +28,10 @@ describe 'redis::default' do
       expect(chef_run).to install_package('tcl8.5')
     end
 
+    it 'install redis' do
+      expect(chef_run).to install_redis('2.8.9')
+    end
+
     it 'retreives the application from source code' do
       expect(chef_run).to create_remote_file("/tmp/redis-#{version}.tar.gz")
     end
@@ -39,12 +43,12 @@ describe 'redis::default' do
 
     it 'builds and installs the application' do
       resource = chef_run.execute('unzip_redis_archive')
-      expect(resource).to notify('execute[make && make install]').to(:run).immediately
+      expect(resource).to notify('execute[build_and_install_redis]').to(:run).immediately
     end
 
     it 'installs the server' do
-      resource = chef_run.execute('make && make install')
-      expect(resource).to notify('execute[echo -n | ./install_server.sh]').to(:run).immediately
+      resource = chef_run.execute('build_and_install_redis')
+      expect(resource).to notify('execute[install_server_redis]').to(:run).immediately
     end
 
     it 'starts the service' do
